@@ -54,16 +54,24 @@ def generate_batch_superstring_data(batch_size, num_str, str_dim, alphabet_size=
     
     # Generate index tensors for efficient slicing
     overlap_indices = torch.arange(str_dim).expand(batch_size, num_str - 1, str_dim)
-    overlap_lengths_expanded = overlap_lengths.unsqueeze(-1).expand(-1, -1, str_dim)
-    start_indices = str_dim - overlap_lengths_expanded
+    overlap_mask_expanded = overlap_mask.unsqueeze(-1).expand(batch_size, num_str - 1, str_dim)
+    overlap_lengths_expanded = overlap_lengths.unsqueeze(-1).expand(batch_size, num_str - 1, str_dim)
 
     # Generate a mask for the overlap regions
-    overlap_region_mask = overlap_indices < overlap_lengths_expanded
-
+    overlap_region_mask = (overlap_indices < overlap_lengths_expanded) & overlap_mask_expanded
+    
     # Copy the values to the overlap region
     previous_strings = batch_data[:, :-1, :].clone()
     for i in range(str_dim):
         current_mask = overlap_region_mask[:, :, i]
-        batch_data[:, 1:, i][current_mask] = previous_strings[:, :, -1][current_mask]
+        selected_overlap_index_at_i = (str_dim - overlap_lengths + i).view(-1,1) % str_dim
+        selected_overlap = previous_strings.view(-1, str_dim).gather(1, selected_overlap_index_at_i).view(batch_size, num_str - 1)
+        batch_data[:, 1:, i][current_mask] = selected_overlap[current_mask]
+    
+    # Shuffle the num_str dimension
+    print(batch_data)
+    perm = torch.rand(batch_size, num_str).argsort(dim=1)
+    print(perm)
+    batch_data = batch_data[torch.arange(batch_size).unsqueeze(1), perm]
     
     return batch_data.float()

@@ -84,7 +84,7 @@ policy = AttentionModelPolicy(env_name = env.name,
 # Model: default is AM with REINFORCE and greedy rollout baseline
 model = AttentionModel(env, 
             policy=policy,
-            batch_size=512,
+            batch_size=500,
             train_data_size=100000,  # each epoch,
             val_batch_size=1000,
             val_data_size=1000,
@@ -93,7 +93,7 @@ model = AttentionModel(env,
             optimizer="Adam",
             optimizer_kwargs={"lr": 1e-4, "weight_decay": 1e-6},
             lr_scheduler="MultiStepLR",
-            lr_scheduler_kwargs={"milestones": [901, ], "gamma": 0.1},
+            lr_scheduler_kwargs={"milestones": [1901, ], "gamma": 0.1},
         )
 
 # Checkpointing callback: save models when validation reward improves
@@ -114,7 +114,7 @@ logger = WandbLogger(project="ssp", name=f"{env.name}_{num_loc}")
 
 
 # We use our own wrapper around Lightning's `Trainer` to make it easier to use
-trainer = RL4COTrainer(max_epochs=1000, 
+trainer = RL4COTrainer(max_epochs=2000, 
                        accelerator = 'gpu', 
                        devices=1,   
                        logger=logger,
