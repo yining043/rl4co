@@ -69,9 +69,7 @@ def generate_batch_superstring_data(batch_size, num_str, str_dim, alphabet_size=
         batch_data[:, 1:, i][current_mask] = selected_overlap[current_mask]
     
     # Shuffle the num_str dimension
-    print(batch_data)
     perm = torch.rand(batch_size, num_str).argsort(dim=1)
-    print(perm)
     batch_data = batch_data[torch.arange(batch_size).unsqueeze(1), perm]
     
     return batch_data.float()
