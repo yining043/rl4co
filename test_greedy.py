@@ -149,9 +149,10 @@ def load_npz_to_tensordict(filename):
     return TensorDict(x_dict, batch_size=batch_size)
 
 
-codes = np.load('./data/ssp_100_15.npz')["codes"]
+codes = np.load('./data/data_ssp.npz')["codes"]
+num_ins = codes.shape[0]
 instance = []
-for i in tqdm(range(10000)):
+for i in tqdm(range(num_ins)):
     ssp = codes[i].astype(int).tolist()
     ss = []
     for j in ssp:
@@ -161,19 +162,11 @@ print(len(instance), len(instance[0]), len(instance[0][0]))
 
 from tqdm import tqdm 
 ans_greedy = []
-k =20
-for i in tqdm(range(10000)):
+k = 2
+for i in tqdm(range(num_ins)):
     gr_ssstr = greedy_scs(instance[i], k)
     ans_greedy.append(len(gr_ssstr))
 ans_greedy = np.array(ans_greedy)
 
 print(np.mean(ans_greedy))
 np.savez(f'greedy_{k}-mers_output.npz', ans_greedy)
-
-# 1-mers: about 1h50m for 10,000 instances, the average is 905.1268
-# 2-mers: about 1h8m  for 10,000 instances, the average is 920.365
-# 3-mers: about 43m02s for 10,000 instances, the average is 940.528
-# 5-mers: about 20m59s for 10,000 instances, the average is 977.8808
-# 10-mers: about 6m10s for 10,000 instances, the average is 1264.7653
-# 14-mers: about 1m36s for 10,000 instances, the average is 1444.2949
-# 15-mers: about 38s for 10,000 instances, the average is 1483.6965
